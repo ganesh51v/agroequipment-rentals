@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Payment</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="profile-page">
+    <aside class="sidebar">
+      <div class="profile-info">
+        <img src="images/profilelogo.jpg" alt="Profile Picture" />
+        <div>
+          <div class="greeting">Hello</div>
+          <div class="name">Kazi Mahbub</div>
+        </div>
+      </div>
+      <nav>
+        <a href="profile.html"><i class="fas fa-user"></i> My Accounts</a>
+        <a href="my-orders.html"><i class="fas fa-shopping-basket"></i> My Orders</a>
+        <a href="returns-cancel.html"><i class="fas fa-ban"></i> Returns & Cancel</a>
+        <a href="ratings-reviews.html"><i class="fas fa-star"></i> My Rating & Reviews</a>
+        <a href="wishlist.html"><i class="fas fa-heart"></i> My Wishlist</a>
+        <a href="payment.html" class="active"><i class="fas fa-credit-card"></i> Payment</a>
+        <a href="change-password.html"><i class="fas fa-key"></i> Change Password</a>
+      </nav>
+    </aside>
+    <main class="content">
+      <h2>Payment</h2>
+      <div class="profile-form">
+        <p>Manage your payment methods and billing information.</p>
+        <form id="payment-form">
+          <div class="form-group">
+            <label for="payment-type">Payment Type</label>
+            <select id="payment-type" name="payment-type" required>
+              <option value="">Select Payment Type</option>
+              <option value="credit-card">Credit Card</option>
+              <option value="debit-card">Debit Card</option>
+              <option value="paypal">PayPal</option>
+              <option value="bank-transfer">Bank Transfer</option>
+              <option value="mobile-payment">Mobile Payment</option>
+            </select>
+          </div>
+          <div class="form-group card-info">
+            <label for="card-number">Card Number</label>
+            <input id="card-number" type="text" placeholder="1234 5678 9012 3456" />
+          </div>
+          <div class="form-group card-info">
+            <label for="expiry-date">Expiry Date</label>
+            <input id="expiry-date" type="text" placeholder="MM/YY" />
+          </div>
+          <div class="form-group card-info">
+            <label for="cvv">CVV</label>
+            <input id="cvv" type="text" placeholder="123" />
+          </div>
+          <button type="submit" class="btn btn-primary">Save Payment Method</button>
+        </form>
+      </div>
+    </main>
+  </div>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const paymentTypeSelect = document.getElementById('payment-type');
+      const cardInfoFields = document.querySelectorAll('.card-info');
+
+      paymentTypeSelect.addEventListener('change', () => {
+        const selectedValue = paymentTypeSelect.value;
+        if (selectedValue === 'credit-card' || selectedValue === 'debit-card') {
+          cardInfoFields.forEach(field => field.style.display = 'block');
+        } else {
+          cardInfoFields.forEach(field => field.style.display = 'none');
+        }
+      });
+
+      // Form submission handler
+      const paymentForm = document.getElementById('payment-form');
+      paymentForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        // Add form validation and submission logic here
+        alert('Payment method saved successfully!');
+      });
+    });
+  </script>
+</body>
+</html>

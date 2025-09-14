@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Equipment Providers - AgroRent</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+        .providers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        .provider-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .provider-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        }
+        .provider-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .provider-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            border: 3px solid white;
+            object-fit: cover;
+        }
+        .provider-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .provider-role {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: inline-block;
+        }
+        .provider-details {
+            padding: 1.5rem;
+        }
+        .provider-info {
+            margin-bottom: 1rem;
+        }
+        .provider-info p {
+            margin: 0.5rem 0;
+            display: flex;
+            align-items: center;
+        }
+        .provider-info i {
+            margin-right: 0.5rem;
+            color: var(--primary-color);
+            width: 16px;
+        }
+        .provider-actions {
+            padding: 1rem 1.5rem 1.5rem;
+            border-top: 1px solid #eee;
+        }
+        .btn-contact {
+            width: 100%;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .btn-contact:hover {
+            background: var(--secondary-color);
+        }
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            font-size: 1.1rem;
+            color: #666;
+        }
+        .error {
+            text-align: center;
+            padding: 2rem;
+            color: #d9534f;
+            background: #f2dede;
+            border: 1px solid #ebccd1;
+            border-radius: 5px;
+            margin: 2rem 0;
+        }
+        .no-providers {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+        .no-providers i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        @media (max-width: 768px) {
+            .providers-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="index.html" class="nav-logo">AgroRent</a>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+                <li class="nav-item"><a href="services.html" class="nav-link">Services</a></li>
+                <li class="nav-item"><a href="providers.html" class="nav-link active">Providers</a></li>
+                <li class="nav-item"><a href="about.html" class="nav-link">About</a></li>
+                <li class="nav-item"><a href="contact.html" class="nav-link">Contact</a></li>
+                <li class="nav-item"><a href="login.html" class="nav-link btn">Login</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Our Equipment Providers</h1>
+                <p>Connect with trusted equipment providers in your area. Browse their profiles and get in touch for your farming needs.</p>
+            </div>
+        </section>
+
+        <section class="container">
+            <!-- Provider Profile Management (only for logged-in providers) -->
+            <div id="provider-profile-section" style="display: none;">
+                <div class="profile-form-container">
+                    <h2>Manage Your Profile</h2>
+                    <form id="provider-profile-form" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="profile-picture">Profile Picture:</label>
+                            <input type="file" id="profile-picture" name="avatar" accept="image/*">
+                            <div id="current-picture-preview" class="picture-preview"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="profile-description">Description:</label>
+                            <textarea id="profile-description" name="description" rows="4" maxlength="1000"
+                                placeholder="Tell customers about your services, experience, and what makes you unique..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Profile</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Providers List -->
+            <div id="providers-container">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    Loading providers...
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 AgroRent. All Rights Reserved. | Ongole, Andhra Pradesh, India</p>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script>
+        let providers = [];
+
+        // Function to fetch providers from backend
+        async function fetchProviders() {
+            try {
+                const response = await fetch('http://localhost:5001/api/providers');
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    providers = data.providers;
+                    displayProviders(providers);
+                } else {
+                    showError('Failed to load providers. Please try again later.');
+                }
+            } catch (error) {
+                console.error('Error fetching providers:', error);
+                showError('Unable to connect to server. Please check your connection.');
+            }
+        }
+
+        // Function to display providers
+        function displayProviders(providersList) {
+            const container = document.getElementById('providers-container');
+
+            if (providersList.length === 0) {
+                container.innerHTML = `
+                    <div class="no-providers">
+                        <i class="fas fa-users"></i>
+                        <h3>No Providers Found</h3>
+                        <p>There are currently no equipment providers registered in our system.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const providersHTML = `
+                <div class="providers-grid">
+                    ${providersList.map(provider => `
+                        <div class="provider-card">
+                            <div class="provider-header">
+                                <img src="${provider.avatar ? '/uploads/' + provider.avatar : 'images/no-image.jpg'}"
+                                     alt="${provider.name}"
+                                     class="provider-avatar"
+                                     onerror="this.src='images/profilelogo.jpg'">
+                                <div class="provider-name">${provider.name}</div>
+                                <div class="provider-role">Equipment Provider</div>
+                            </div>
+                            <div class="provider-details">
+                                <div class="provider-info">
+                                    ${provider.email ? `<p><i class="fas fa-envelope"></i> ${provider.email}</p>` : ''}
+                                    ${provider.phone ? `<p><i class="fas fa-phone"></i> ${provider.phone}</p>` : ''}
+                                    ${provider.address ? `<p><i class="fas fa-map-marker-alt"></i> ${provider.address}</p>` : ''}
+                                </div>
+                            </div>
+                            <div class="provider-actions">
+                                <button class="btn-contact" onclick="contactProvider('${provider.email}', '${provider.name}')">
+                                    <i class="fas fa-envelope"></i> Contact Provider
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            container.innerHTML = providersHTML;
+        }
+
+        // Function to handle provider contact
+        function contactProvider(email, name) {
+            const subject = encodeURIComponent('Inquiry about Equipment Rental');
+            const body = encodeURIComponent(`Dear ${name},\n\nI am interested in your equipment rental services. Please provide more information about your available equipment and pricing.\n\nBest regards,\n[Your Name]`);
+            window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+        }
+
+        // Function to show error message
+        function showError(message) {
+            const container = document.getElementById('providers-container');
+            container.innerHTML = `
+                <div class="error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Error</h3>
+                    <p>${message}</p>
+                    <button onclick="fetchProviders()" class="btn btn-primary" style="margin-top: 1rem;">Try Again</button>
+                </div>
+            `;
+        }
+
+        // Function to check if user is logged in as provider and show profile section
+        function checkProviderLogin() {
+            const storedUser = localStorage.getItem('user');
+            const token = localStorage.getItem('token');
+
+            if (storedUser && token) {
+                try {
+                    const user = JSON.parse(storedUser);
+                    if (user && user.role === 'provider' && user.isProviderSelected) {
+                        document.getElementById('provider-profile-section').style.display = 'block';
+                        loadProviderProfile();
+                        return;
+                    }
+                } catch (e) {
+                    console.error('Error parsing user data:', e);
+                }
+            }
+            document.getElementById('provider-profile-section').style.display = 'none';
+        }
+
+        // Function to load provider profile data
+        async function loadProviderProfile() {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            try {
+                const response = await fetch('http://localhost:5001/api/providers/profile', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    const provider = data.provider;
+                    document.getElementById('profile-description').value = provider.description || '';
+
+                    // Show current picture preview
+                    const previewDiv = document.getElementById('current-picture-preview');
+                    if (provider.avatar) {
+                        previewDiv.innerHTML = `
+                            <p>Current Picture:</p>
+                            <img src="/uploads/${provider.avatar}" alt="Current Profile Picture" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;">
+                        `;
+                    } else {
+                        previewDiv.innerHTML = '<p>No profile picture uploaded yet.</p>';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+        }
+
+        // Function to handle profile form submission
+        async function handleProfileUpdate(e) {
+            e.preventDefault();
+
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('Please login first.');
+                return;
+            }
+
+            const formData = new FormData();
+            const description = document.getElementById('profile-description').value;
+            const avatarFile = document.getElementById('profile-picture').files[0];
+
+            if (description) {
+                formData.append('description', description);
+            }
+
+            if (avatarFile) {
+                formData.append('avatar', avatarFile);
+            }
+
+            try {
+                const response = await fetch('http://localhost:5000/api/providers/profile', {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    alert('Profile updated successfully!');
+                    loadProviderProfile(); // Reload profile data
+                    fetchProviders(); // Refresh providers list
+                } else {
+                    alert(data.message || 'Failed to update profile.');
+                }
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                alert('Failed to update profile. Please try again.');
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchProviders();
+            checkProviderLogin();
+
+            // Add form submission handler
+            const profileForm = document.getElementById('provider-profile-form');
+            if (profileForm) {
+                profileForm.addEventListener('submit', handleProfileUpdate);
+            }
+        });
+    </script>
+</body>
+</html>

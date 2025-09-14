@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Book Equipment - AgroRent</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+        .equipment-details {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background-color: #f4f9f4;
+            border-left: 5px solid var(--primary-color);
+            border-radius: 6px;
+        }
+        .equipment-image img {
+            width: 180px;
+            height: 130px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+        .equipment-info h3 {
+            margin: 0 0 0.5rem 0;
+            color: var(--primary-color);
+        }
+        .equipment-info p {
+            margin: 0.25rem 0;
+        }
+        .equipment-price {
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+        .form-group-row {
+            display: flex;
+            gap: 1rem;
+        }
+        .form-group-row .form-group {
+            flex: 1;
+        }
+        @media (max-width: 600px) {
+            .form-group-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="index.html" class="nav-logo">AgroRent</a>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+                <li class="nav-item"><a href="services.html" class="nav-link">Services</a></li>
+                <li class="nav-item"><a href="about.html" class="nav-link">About</a></li>
+                <li class="nav-item"><a href="contact.html" class="nav-link">Contact</a></li>
+                <li class="nav-item"><a href="login.html" class="nav-link btn">Login</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="form-page">
+        <div class="form-container">
+            <h2>Book: <span id="equipment-name">Equipment</span></h2>
+            <p>Please fill out the details below to request a booking. We will contact you to confirm.</p>
+
+            <div class="equipment-details" id="equipment-details">
+                <div class="equipment-image">
+                    <img id="equipment-img" src="images" alt="No equipment selected" />
+                </div>
+                <div class="equipment-info">
+                    <h3 id="equipment-title">Equipment Name</h3>
+                    <p id="equipment-description">Equipment description will appear here.</p>
+                    <p class="equipment-price">Rate: ₹<span id="equipment-rate">0</span>/hr</p>
+                </div>
+            </div>
+
+            <form id="booking-form">
+                <input type="hidden" id="equipment-type" name="equipment" />
+                
+                <div class="form-group">
+                    <label for="booking-name">Full Name</label>
+                    <input type="text" id="booking-name" name="name" required />
+                </div>
+                
+                <div class="form-group">
+                    <label for="booking-phone">Phone Number</label>
+                    <input type="tel" id="booking-phone" name="phone" required placeholder="e.g., 999-999-9999" />
+                </div>
+                
+                <div class="form-group">
+                    <label for="booking-email">Email Address</label>
+                    <input type="email" id="booking-email" name="email" required />
+                </div>
+                
+                <div class="form-group">
+                    <label for="booking-address">Farm Address / Location</label>
+                    <textarea id="booking-address" name="address" rows="3" required></textarea>
+                </div>
+                
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label for="start-date">Booking Start Date</label>
+                        <input type="date" id="start-date" name="startDate" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="end-date">Booking End Date</label>
+                        <input type="date" id="end-date" name="endDate" required />
+                    </div>
+                </div>
+                
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label for="start-time">Booking Start Time</label>
+                        <input type="time" id="start-time" name="startTime" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="end-time">Booking End Time</label>
+                        <input type="time" id="end-time" name="endTime" required />
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="booking-notes">Additional Notes (Optional)</label>
+                    <textarea id="booking-notes" name="notes" rows="3" placeholder="Any special requirements or notes..."></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary form-btn">Request Booking</button>
+            </form>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 AgroRent. All Rights Reserved. | Ongole, Andhra Pradesh, India</p>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script>
+        let equipmentList = [];
+        let equipmentMap = {};
+
+        // Function to fetch equipment list from backend
+        async function fetchEquipmentList() {
+            try {
+                const response = await fetch('http://localhost:5001/api/equipment?limit=1000');
+                const data = await response.json();
+                if (response.ok) {
+                    equipmentList = data.equipment;
+                    console.log('Fetched equipment list data:', equipmentList); // Added for debugging
+                    // Create a map of equipment names to IDs
+                    equipmentMap = {};
+                    equipmentList.forEach(eq => {
+                        equipmentMap[eq.name] = eq._id || eq.id;
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching equipment list:', error);
+            }
+        }
+
+        // Function to populate equipment details
+        function populateEquipmentDetails(equipmentName) {
+            // Normalize equipmentName for matching
+            const normalizedName = equipmentName.trim().toLowerCase();
+            // Allow partial matching
+            const equipment = equipmentList.find(eq => eq.name.trim().toLowerCase().includes(normalizedName));
+            if (equipment) {
+                document.getElementById('equipment-name').textContent = equipment.name;
+                document.getElementById('equipment-title').textContent = equipment.name;
+                document.getElementById('equipment-description').textContent = equipment.description || 'No description available.';
+                document.getElementById('equipment-rate').textContent = equipment.price || '0';
+
+                // Parse images JSON string if needed
+                let images = [];
+                try {
+                    images = typeof equipment.images === 'string' ? JSON.parse(equipment.images) : equipment.images;
+                } catch (e) {
+                    console.warn('Error parsing images JSON:', e);
+                }
+
+                // Map equipment names to actual image filenames
+                const imageMap = {
+                    'Tractor Model X': 'tractor.jpg',
+                    'Combine Harvester 3000': 'combine harvester.jpg',
+                    'Seed Drill Pro': 'seeddriller.jpg',
+                    'Power Weeder': 'powerweeder.jpg',
+                    'Reaper Machine': 'reapermachine.jpg',
+                    'Power Sprayer': 'powersprayer.jpg',
+                    'Cultivator': 'cultivator.jpg',
+                    'Rotary Tiller': 'rotatry triller.png'
+                };
+
+                if (images.length > 0) {
+                    // Correct the image filename by replacing underscores with spaces
+                    const correctedImage = images[0].replace(/_/g, ' ');
+                    // Check if image file exists in /images folder
+                    fetch('/images/' + correctedImage, { method: 'HEAD' })
+                        .then(response => {
+                            if (response.ok) {
+                                document.getElementById('equipment-img').src = '/images/' + correctedImage;
+                            } else {
+                                // Fallback to mapped image or no-image
+                                const localImageName = imageMap[equipment.name] || 'no-image.jpg';
+                                document.getElementById('equipment-img').src = 'images/' + localImageName;
+                            }
+                        })
+                        .catch(() => {
+                            const localImageName = imageMap[equipment.name] || 'no-image.jpg';
+                            document.getElementById('equipment-img').src = 'images/' + localImageName;
+                        });
+                } else {
+                    // Fallback to mapped image
+                    const localImageName = imageMap[equipment.name] || 'no-image.jpg';
+                    document.getElementById('equipment-img').src = 'images/' + localImageName;
+                }
+                document.getElementById('equipment-img').alt = equipment.name;
+                document.getElementById('equipment-type').value = equipment.name;
+            } else {
+                console.warn(`Equipment not found: ${equipmentName}`);
+                alert(`Selected equipment "${equipmentName}" not found. Showing default equipment.`);
+                // Fallback to default values
+                document.getElementById('equipment-name').textContent = equipmentName || 'Equipment';
+                document.getElementById('equipment-title').textContent = equipmentName || 'Equipment';
+                document.getElementById('equipment-description').textContent = 'Equipment description will appear here.';
+                document.getElementById('equipment-rate').textContent = '0';
+                document.getElementById('equipment-img').src = 'images/no-image.jpg';
+                document.getElementById('equipment-img').alt = 'Equipment Image';
+                document.getElementById('equipment-type').value = equipmentName || '';
+            }
+        }
+
+        // Function to handle form submission
+        function handleBookingForm() {
+            const form = document.getElementById('booking-form');
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                // Check if user is logged in
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    alert('Please login first to make a booking.');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                const name = document.getElementById('booking-name').value;
+                const phone = document.getElementById('booking-phone').value;
+                const address = document.getElementById('booking-address').value;
+                const startDate = document.getElementById('start-date').value;
+                const endDate = document.getElementById('end-date').value;
+                const equipmentName = document.getElementById('equipment-type').value;
+
+                if (!name || !phone || !address || !startDate || !endDate) {
+                    alert('Please fill in all booking details.');
+                    return;
+                }
+
+                if (new Date(endDate) < new Date(startDate)) {
+                    alert('The booking end date cannot be before the start date.');
+                    return;
+                }
+
+                // Get equipment ID from name
+                const equipmentId = equipmentMap[equipmentName];
+                if (!equipmentId) {
+                    alert('Equipment not found. Please try again.');
+                    return;
+                }
+
+                // Calculate total price
+                const equipment = equipmentList.find(eq => eq._id === equipmentId);
+                const start = new Date(startDate);
+                // Define calculateTotalPrice function here
+                function calculateTotalPrice(equipmentId, startDate, endDate) {
+                    const equipment = equipmentList.find(eq => eq._id === equipmentId);
+                    if (!equipment) return 0;
+
+                    const start = new Date(startDate);
+                    const end = new Date(endDate);
+                    const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1; // Include both start and end dates
+
+                    return equipment.price * days;
+                }
+                const totalPrice = calculateTotalPrice(equipmentId, startDate, endDate);
+
+                const bookingData = {
+                    equipment: equipmentId,
+                    startDate: startDate,
+                    endDate: endDate,
+                    totalPrice: totalPrice,
+                    deliveryAddress: address,
+                    notes: document.getElementById('booking-notes').value
+                };
+
+                try {
+                    const response = await fetch('http://localhost:5001/api/bookings', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(bookingData)
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        alert(`Thank you, ${name}! Your booking request has been received. We will contact you at ${phone} to confirm.`);
+                        form.reset();
+                        window.location.href = 'services.html';
+                    } else {
+                        alert(data.message || 'Booking failed. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Booking error:', error);
+                    alert('Booking failed. Please try again.');
+                }
+            });
+        }
+
+        // Function to set minimum date to today
+        function setMinDate() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('start-date').min = today;
+            document.getElementById('end-date').min = today;
+        }
+
+        // Function to validate dates
+        function validateDates() {
+            const startDate = document.getElementById('start-date');
+            const endDate = document.getElementById('end-date');
+            
+            endDate.addEventListener('change', function() {
+                if (this.value < startDate.value) {
+                    alert('End date must be after start date');
+                    this.value = startDate.value;
+                }
+            });
+        }
+
+        // Initialize booking page
+        document.addEventListener('DOMContentLoaded', async function() {
+            setMinDate();
+            validateDates();
+            handleBookingForm();
+
+        // Fetch equipment list first
+        await fetchEquipmentList();
+
+        // Populate equipment details if URL parameter exists
+        const urlParams = new URLSearchParams(window.location.search);
+        const equipment = urlParams.get('equipment');
+        console.log('Equipment from URL:', equipment);
+        if (equipment) {
+            // Wait until equipmentList is populated
+            const intervalId = setInterval(() => {
+                if (equipmentList.length > 0) {
+                    clearInterval(intervalId);
+                    console.log('Fetched equipment list:', equipmentList.map(eq => eq.name));
+                    // Normalize equipment name for matching
+                    const normalizedEquipment = equipment.trim().toLowerCase();
+                    const matchedEquipment = equipmentList.find(eq => eq.name.trim().toLowerCase().includes(normalizedEquipment));
+                    console.log('Matched equipment:', matchedEquipment);
+                    if (matchedEquipment) {
+                        populateEquipmentDetails(equipment);
+                    } else {
+                        console.warn(`Equipment from URL not found: ${equipment}`);
+                        alert(`Selected equipment "${equipment}" not found. Showing default equipment.`);
+                        // If equipment not found, fallback to first equipment
+                        const firstEquipment = equipmentList.length > 0 ? equipmentList[0].name : 'Equipment';
+                        populateEquipmentDetails(firstEquipment);
+                    }
+                }
+            }, 100);
+        } else {
+            // Default to first equipment if no URL parameter
+            const firstEquipment = equipmentList.length > 0 ? equipmentList[0].name : 'Equipment';
+            populateEquipmentDetails(firstEquipment);
+        }
+        });
+    </script>
+</body>
+</html>

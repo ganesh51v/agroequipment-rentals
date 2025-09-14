@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>My Orders</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="profile-page">
+    <aside class="sidebar">
+      <div class="profile-info">
+        <img src="images/profilelogo.jpg" alt="Profile Picture" />
+        <div>
+          <div class="greeting">Hello</div>
+          <div class="name">Kazi Mahbub</div>
+        </div>
+      </div>
+      <nav>
+        <a href="profile.html"><i class="fas fa-user"></i> My Accounts</a>
+        <a href="my-orders.html" class="active"><i class="fas fa-shopping-basket"></i> My Orders</a>
+        <a href="returns-cancel.html"><i class="fas fa-ban"></i> Returns & Cancel</a>
+        <a href="ratings-reviews.html"><i class="fas fa-star"></i> My Rating & Reviews</a>
+        <a href="wishlist.html"><i class="fas fa-heart"></i> My Wishlist</a>
+        <a href="payment.html"><i class="fas fa-credit-card"></i> Payment</a>
+        <a href="change-password.html"><i class="fas fa-key"></i> Change Password</a>
+      </nav>
+    </aside>
+    <main class="content">
+      <h2>My Orders</h2>
+      <div class="profile-form">
+        <p>Here you can view and manage your orders.</p>
+        <!-- Add order list or table here -->
+        <button id="refresh-orders" class="btn btn-primary">Refresh Orders</button>
+        <div class="order-list">
+          <div class="order-item">
+            <h3>Order #12345</h3>
+            <p>Tractor Rental - $500</p>
+            <p>Status: Delivered</p>
+          </div>
+          <div class="order-item">
+            <h3>Order #12346</h3>
+            <p>Combine Harvester - $800</p>
+            <p>Status: In Transit</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <script>
+    async function fetchAndRenderOrders() {
+      const orderList = document.querySelector('.order-list');
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        alert('Please login to view your orders.');
+        window.location.href = 'login.html';
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:5001/api/bookings/mybookings', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          if (data.bookings.length === 0) {
+            orderList.innerHTML = '<p>No orders found.</p>';
+            return;
+          }
+
+          // Clear existing content
+          orderList.innerHTML = '';
+
+          // Populate orders
+          data.bookings.forEach(booking => {
+            const orderItem = document.createElement('div');
+            orderItem.className = 'order-item';
+            const startDate = new Date(booking.startDate).toLocaleDateString();
+            const endDate = new Date(booking.endDate).toLocaleDateString();
+            orderItem.innerHTML = `
+              <h3>Booking #${booking._id.slice(-6)}</h3>
+              <p><strong>Equipment:</strong> ${booking.equipment.name}</p>
+              <p><strong>Dates:</strong> ${startDate} to ${endDate}</p>
+              <p><strong>Total Price:</strong> ₹${booking.totalPrice}</p>
+              <p><strong>Status:</strong> <span class="status-${booking.status}">${booking.status}</span></p>
+              <p><strong>Delivery Address:</strong> ${booking.deliveryAddress}</p>
+              ${booking.notes ? `<p><strong>Notes:</strong> ${booking.notes}</p>` : ''}
+            `;
+            orderList.appendChild(orderItem);
+          });
+        } else {
+          alert(data.message || 'Failed to load orders.');
+        }
+      } catch (error) {
+        console.error('Error loading orders:', error);
+        alert('Error loading orders. Please try again.');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchAndRenderOrders();
+
+      const refreshButton = document.getElementById('refresh-orders');
+      refreshButton.addEventListener('click', () => {
+        fetchAndRenderOrders();
+      });
+    });
+  </script>
+</body>
+</html>

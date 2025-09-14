@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Services - AgroRent</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+             <a href="index.html" class="nav-logo">AgroRent</a>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+                <li class="nav-item"><a href="services.html" class="nav-link active">Services</a></li>
+                <li class="nav-item"><a href="providers.html" class="nav-link">Providers</a></li>
+                <li class="nav-item"><a href="about.html" class="nav-link">About</a></li>
+                <li class="nav-item"><a href="contact.html" class="nav-link">Contact</a></li>
+                <li class="nav-item"><a href="login.html" class="nav-link btn">Login</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="container">
+            <h2 class="page-title">Our Equipment for Rent</h2>
+            <div class="services-grid">
+                <div class="card service-card">
+                    <img src="images/tractor.jpg" alt="Tractor">
+                    <h3>Tractor</h3>
+                    <p>High-power tractor for ploughing, tilling, and planting. Starting at ₹1876/hr.</p>
+                    <a href="booking-fixed.html?equipment=Tractor" class="btn btn-secondary rent-btn">Rent Now</a>
+                </div>
+                 <div class="card service-card">
+                    <img src="images/combine harvester.jpg" alt="Harvester">
+                    <h3>Combine Harvester</h3>
+                    <p>Efficiently harvest a variety of grain crops. Starting at ₹2345/hr.</p>
+                    <a href="booking-fixed.html?equipment=Combine Harvester" class="btn btn-secondary rent-btn">Rent Now</a>
+                </div>
+                 <div class="card service-card">
+                    <img src="images/rotatry triller.png" alt="Rotary Tiller">
+                    <h3>Rotary Tiller</h3>
+                    <p>Perfect for preparing seedbeds for gardens and farms. Starting at ₹499/hr.</p>
+                    <a href="booking-fixed.html?equipment=Rotary Tiller" class="btn btn-secondary rent-btn">Rent Now</a>
+                </div>
+                <div class="card service-card">
+                    <img src="images/seeddriller.jpg" alt="Seeder">
+                    <h3>Seed Drill / Seeder</h3>
+                    <p>Automate your seeding process for precision and speed. Starting at ₹599/hr.</p>
+                    <a href="booking-fixed.html?equipment=Seed Drill" class="btn btn-secondary rent-btn">Rent Now</a>
+                </div>
+                <div class="card service-card">
+                    <img src="images/powerweeder.jpg" alt="Power Weeder">
+                    <h3>Power Weeder</h3>
+                    <p>Efficient weeding solution for row crops and vegetables. Starting at ₹399/hr.</p>
+                    <a href="booking-fixed.html?equipment=Power Weeder" class="btn btn-secondary rent-btn">Rent Now</a>
+                </div>
+                <div class="card service-card">
+                    <img src="images/reapermachine.jpg" alt="Reaper">
+                    <h3>Reaper Machine</h3>
+                    <p>Perfect for harvesting cereals and pulses efficiently. Starting at ₹899/hr.</p>
+                    <a href="booking-fixed.html?equipment=Reaper Machine" class="btn btn-secondary rent-btn">Rent Now</a>
+                </div>
+                <div class="card service-card">
+                    <img src="images/powersprayer.jpg" alt="Sprayer">
+                    <h3>Power Sprayer</h3>
+                    <p>High-pressure spraying for pesticides and fertilizers. Starting at ₹299/hr.</p>
+                    <a href="booking-fixed.html?equipment=Power Sprayer" class="btn btn-secondary rent-btn">Rent Now</a>
+                </div>
+                <div class="card service-card">
+                    <img src="images/cultivator.jpg" alt="Cultivator">
+                    <h3>Cultivator</h3>
+                    <p>Soil preparation and weed control between crop rows. Starting at ₹449/hr.</p>
+                    <a href="booking-fixed.html?equipment=Cultivator" class="btn btn-secondary rent-btn">Rent Now</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Providers Section -->
+        <section class="container">
+            <h2 class="page-title">Our Equipment Providers</h2>
+            <div id="providers-section">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    Loading providers...
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 AgroRent. All Rights Reserved.</p>
+    </footer>
+    <script src="js/script.js"></script>
+    <script>
+        // Function to fetch and display providers on services page
+        async function fetchProvidersForServices() {
+            try {
+                const response = await fetch('http://localhost:5000/api/providers');
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    displayProvidersInServices(data.providers);
+                } else {
+                    showProvidersError('Failed to load providers. Please try again later.');
+                }
+            } catch (error) {
+                console.error('Error fetching providers:', error);
+                showProvidersError('Unable to connect to server. Please check your connection.');
+            }
+        }
+
+        // Function to display providers in services page
+        function displayProvidersInServices(providersList) {
+            const container = document.getElementById('providers-section');
+
+            if (providersList.length === 0) {
+                container.innerHTML = `
+                    <div class="no-providers">
+                        <i class="fas fa-users"></i>
+                        <h3>No Providers Found</h3>
+                        <p>There are currently no equipment providers registered in our system.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const providersHTML = `
+                <div class="providers-grid">
+                    ${providersList.map(provider => `
+                        <div class="provider-card">
+                            <div class="provider-header">
+                                <img src="${provider.avatar ? '/uploads/' + provider.avatar : 'images/no-image.jpg'}"
+                                     alt="${provider.name}"
+                                     class="provider-avatar"
+                                     onerror="this.src='images/profilelogo.jpg'">
+                                <div class="provider-name">${provider.name}</div>
+                                <div class="provider-role">Equipment Provider</div>
+                            </div>
+                            <div class="provider-details">
+                                ${provider.description ? `<p class="provider-description">${provider.description}</p>` : ''}
+                                <div class="provider-info">
+                                    ${provider.email ? `<p><i class="fas fa-envelope"></i> ${provider.email}</p>` : ''}
+                                    ${provider.phone ? `<p><i class="fas fa-phone"></i> ${provider.phone}</p>` : ''}
+                                    ${provider.address ? `<p><i class="fas fa-map-marker-alt"></i> ${provider.address}</p>` : ''}
+                                </div>
+                            </div>
+                            <div class="provider-actions">
+                                <button class="btn-contact" onclick="contactProvider('${provider.email}', '${provider.name}')">
+                                    <i class="fas fa-envelope"></i> Contact Provider
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            container.innerHTML = providersHTML;
+        }
+
+        // Function to handle provider contact
+        function contactProvider(email, name) {
+            const subject = encodeURIComponent('Inquiry about Equipment Rental');
+            const body = encodeURIComponent(`Dear ${name},\n\nI am interested in your equipment rental services. Please provide more information about your available equipment and pricing.\n\nBest regards,\n[Your Name]`);
+            window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+        }
+
+        // Function to show error message for providers section
+        function showProvidersError(message) {
+            const container = document.getElementById('providers-section');
+            container.innerHTML = `
+                <div class="error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Error</h3>
+                    <p>${message}</p>
+                    <button onclick="fetchProvidersForServices()" class="btn btn-primary" style="margin-top: 1rem;">Try Again</button>
+                </div>
+            `;
+        }
+
+        // Initialize providers section on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchProvidersForServices();
+        });
+    </script>
+</body>
+</html>

@@ -338,7 +338,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 startDate: startDate,
                 endDate: endDate,
                 totalPrice: totalPrice,
-                deliveryAddress: address,
+                address: address,
                 phone: phone,
                 notes: document.getElementById('booking-notes').value
             };

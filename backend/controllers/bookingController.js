@@ -14,11 +14,22 @@ const createBooking = async (req, res) => {
       startDate,
       endDate,
       totalPrice,
-      deliveryAddress,
+      address,
       phone,
       notes
     } = req.body;
-    console.log('Extracted fields:', { equipment, startDate, endDate, totalPrice, deliveryAddress, phone, notes });
+
+    // Validate address presence
+    if (!address || address.trim() === '') {
+      return res.status(400).json({ message: 'Please add delivery address' });
+    }
+
+    // Validate phone presence
+    if (!phone || phone.trim() === '') {
+      return res.status(400).json({ message: 'Please add contact phone number' });
+    }
+
+    console.log('Extracted fields:', { equipment, startDate, endDate, totalPrice, address, phone, notes });
 
     // Check if equipment exists
     const equipmentExists = await Equipment.findById(equipment);
@@ -45,7 +56,7 @@ const createBooking = async (req, res) => {
       startDate,
       endDate,
       totalPrice,
-      deliveryAddress: deliveryAddress,
+      address: address,
       phone: phone,
       notes
     });
